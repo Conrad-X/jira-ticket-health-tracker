@@ -8,42 +8,67 @@ openai:
   api_key: " "
   model: " "
 
-# JQL Query for Different Scripts
-queries:
-  ticket_scores:
-    jql: "project = XYZ AND issuetype = Task AND Sprint = 123"
-  backlog:
-    jql: 'project = XYZ AND Sprint IS EMPTY AND statusCategory != Done'
+# Parameters
+parameters:
+  project: " "
+  issuetype: " "
+  sprint: " "
 
+# JQL Queries
+queries:
+  ticket_scores: "project = {project} AND issuetype = {issuetype} AND Sprint = {sprint}"
+  backlog: "project = {project} AND Sprint IS EMPTY AND statusCategory != Done"
+
+template_headings:
+  task_template_headings:
+    - "Summary"
+    - "Acceptability Criteria"
+    - "Technical Notes"
+    - "Testing Instructions"
+
+  bug_template_headings:
+    - "Summary"
+    - "Steps to Reproduce"
+    - "Technical Notes"
+    - "Testing Instructions"
 
 # Prompts for Different Checks
 prompts:
   relevance: |
     You are a helpful assistant. A Jira ticket has the following summary: "{summary}".
-    The description provided is: "{description}". For now, take only 5 tickets from the backlog section.
-    Rate how well the description aligns with the summary on a scale of 1 to 10, where 1 means not aligned at all and 10 means perfectly aligned. Also, provide a brief explanation (not more than one line) for the score and write it as Relevance Score:.
+    The description provided is: "{description}". Please analyze it based on the provided template headings.
+    Rate how well the description aligns with the summary on a scale of 1 to 10, where 1 means not aligned at all and 10 means perfectly aligned. Also, provide a brief explanation for the score as Relevance Score.
+    Write Relevance Score as Relevance Score: 
 
   adherence: |
     You are a helpful assistant. A Jira ticket has the following description under the Description heading: "{description}".
-    The template requires the following sections: {", ".join(headings)}.
-    Check how many of these sections are present and rate the adherence as a percentage. Write it as Adherence Percentage:
-
-  other_check: |
-    You are a helpful assistant. Analyze the following Jira ticket: "{summary}". Provide a brief summary and rate the quality on a scale of 1 to 10, where 1 is poor and 10 is excellent.
+    The template requires the following sections: {headings}.
+    Check how many of these sections are present and rate the adherence as a percentage.  Write it as Adherence Score:
 
 # Output Configuration for Different Scripts
 output_files:
   ticket_scores: "jira_ticket_scores.csv"
   backlog: "backlog.csv"
 
-# Template Headings
-template_headings:
-  - "Summary"
-  - "Steps to Reproduce"
-  - "Technical Notes"
-  - "Testing Instructions"
-
 # Score Calculation Formula
 scoring:
   weightage_of_relevance: 0.5
   weightage_of_adherence: 0.5
+
+# Template Placeholders
+template_placeholders:
+  bug:
+    summary: "[A concise description of the issue or task.]"
+    steps_to_reproduce: "[Detailed steps that lead to the issue, including screenshots if possible.]"
+    technical_notes: "[Any technical information that might be helpful for the developer, such as dependencies, libraries, or code snippets.]"
+    testing_instructions: "[Instructions or considerations for testing the task or fix.]"
+
+  task:
+    summary: "[A concise description of the task.]"
+    steps_to_reproduce: "[Detailed steps to complete the task.]"
+    technical_notes: "[Technical information relevant to the task.]"
+    testing_instructions: "[Instructions for verifying the task's completion.]"
+
+
+
+
