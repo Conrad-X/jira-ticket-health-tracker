@@ -52,8 +52,9 @@ def check_relevance(description_to_check, summary):
         ]
     ) 
     content = response.choices[0].message.content
-    match = re.search(r"Relevance Score\s*:\s*(\d+)", content, re.IGNORECASE)
-    
+    #print(content)
+    match = re.search(r"Relevance Score\s*:\s*(\d+(\.\d+)?)", content, re.IGNORECASE)
+
     if match:
         relevance_score = float(match.group(1))
     else:
@@ -80,7 +81,8 @@ def check_adherence(description_to_check, headings, placeholders):
     )
     
     content = response.choices[0].message.content
-    match = re.search(r"Adherence Score\s*:\s*(\d+)", content, re.IGNORECASE)
+    print(content)
+    match = re.search(r"Adherence Score:\s*(0(\.\d+)?|1(\.0+)?)", content)
     
     if match:
         adherence_score = float(match.group(1))
@@ -90,26 +92,45 @@ def check_adherence(description_to_check, headings, placeholders):
 
     return adherence_score
 
+def generate_perfect_adherence_description(description_to_check, headings):
+
+    joined_headings = ", ".join(headings)
+
+    prompt = config.PROMPTS['adherence_check'].format(description=description_to_check, headings=joined_headings)
+
+    response = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    
+    content = response.choices[0].message.content
+    return content.strip()
+
 wb = Workbook()
 ws = wb.active
 
 # Set the column headers
-fieldnames = ['Issue', 'Relevance Score (%)', 'Adherence Score (%)', 'Total Score (%)']
+fieldnames = ['Issue', 'Relevance Score (%)', 'Adherence Score (%)', 'Total Score (%)' , 'Edited Description']
 ws.append(fieldnames)
 
-# Process tickets and write data to Excel
+# Process tickets 
 for issue in tickets:
     # Default to using description field
     description_to_check = issue.fields.description
-    task_template = getattr(issue.fields, 'customfield_10806', None)
-    bug_template = getattr(issue.fields, 'customfield_10805', None)
+    task_template = getattr(issue.fields, 'customfield_10806', None) #Add your own customfield id here if you have any template
+    bug_template = getattr(issue.fields, 'customfield_10805', None) #Add your own customfield id here if you have any template 
 
     if issuetype == "Task" and task_template:
         placeholders = list(config.TEMPLATE_PLACEHOLDERS['task'].values())
         headings = config.TEMPLATE_HEADINGS['task_template_headings']
+        description_to_check = task_template
     elif issuetype == "Bug" and bug_template:
         placeholders = list(config.TEMPLATE_PLACEHOLDERS['bug'].values())
         headings = config.TEMPLATE_HEADINGS['bug_template_headings']
+        description_to_check = bug_template
     elif issuetype == "Task":
         headings = config.TEMPLATE_HEADINGS['task_template_headings']
         placeholders = list(config.TEMPLATE_PLACEHOLDERS['task'].values())
@@ -120,29 +141,35 @@ for issue in tickets:
         headings = []
 
     # Check if the Bug/Task template is filled out and contains the relevant sections
-    if task_template:
-        description_to_check = task_template
-    if bug_template:
-        description_to_check = bug_template
+    # if task_template:
+    #     description_to_check = task_template
+    # if bug_template:
+    #     description_to_check = bug_template
 
     if description_to_check is None:
         adherence_score = 0
         relevance_score = 0 
         total_score = 0
     else:
-        adherence_score = check_adherence(description_to_check, headings, placeholders)
+        adherence_score = check_adherence(description_to_check, headings, placeholders)*100
         relevance_score = check_relevance(description_to_check, issue.fields.summary)
         total_score = (
             weightage_of_relevance * relevance_score +
             weightage_of_adherence * adherence_score
         )
 
+    if adherence_score < 100 or adherence_score < 100.0 :
+            new_description = generate_perfect_adherence_description(description_to_check, headings)
+    else:
+        new_description = "No Ammendment Required"
+
     # Write the row to the Excel sheet
     ws.append([
         issue.key,
         f"{relevance_score:.2f}",
         f"{adherence_score:.2f}",
-        f"{total_score:.2f}"
+        f"{total_score:.2f}",
+        new_description
     ])
 
     print(f"Issue: {issue.key}, Relevance Score: {relevance_score:.2f}%, Adherence Score: {adherence_score:.2f}%, Total Score: {total_score:.2f}%")
