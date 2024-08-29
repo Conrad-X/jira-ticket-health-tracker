@@ -81,7 +81,6 @@ def check_adherence(description_to_check, headings, placeholders):
     )
     
     content = response.choices[0].message.content
-    print(content)
     match = re.search(r"Adherence Score:\s*(0(\.\d+)?|1(\.0+)?)", content)
     
     if match:
@@ -96,7 +95,7 @@ def generate_perfect_adherence_description(description_to_check, headings):
 
     joined_headings = ", ".join(headings)
 
-    prompt = config.PROMPTS['adherence_check'].format(description=description_to_check, headings=joined_headings)
+    prompt = config.PROMPTS['adherence_restructure'].format(description=description_to_check, headings=joined_headings)
 
     response = client.chat.completions.create(
         model=model,
@@ -139,12 +138,6 @@ for issue in tickets:
         placeholders = list(config.TEMPLATE_PLACEHOLDERS['task'].values())
     else:
         headings = []
-
-    # Check if the Bug/Task template is filled out and contains the relevant sections
-    # if task_template:
-    #     description_to_check = task_template
-    # if bug_template:
-    #     description_to_check = bug_template
 
     if description_to_check is None:
         adherence_score = 0

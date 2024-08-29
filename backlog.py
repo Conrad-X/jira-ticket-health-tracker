@@ -45,7 +45,6 @@ def check_relevance(description_to_check, summary):
         ]
     ) 
     content = response.choices[0].message.content
-    print(content)
     match = re.search(r"Relevance Score\s*:\s*(\d+)", content, re.IGNORECASE)
     
     if match:
@@ -163,7 +162,7 @@ backlog_graph_buffer.seek(0)
 
 # Generate a graph by Epic
 epic_counts = df['Epic'].value_counts()
-plt.figure(figsize=(12, 8))
+plt.figure(figsize=(10, 6))
 epic_counts.plot(kind='bar', color='skyblue')
 
 plt.title('Number of Issues per Epic')
@@ -180,7 +179,7 @@ epic_graph_buffer.seek(0)
 
 # Generate a graph by Issue Type
 type_counts = df['Issue Type'].value_counts()
-plt.figure(figsize=(12, 8))
+plt.figure(figsize=(10, 6))
 type_counts.plot(kind='bar', color='skyblue')
 
 plt.title('Number of Issues by Type')
