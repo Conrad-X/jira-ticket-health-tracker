@@ -7,6 +7,8 @@ JIRA_CONFIG = {
     "token": ""
 }
 
+Test = {}
+
 OPENAI_CONFIG = {
     "api_key": "",
     "model": "gpt-4o"
