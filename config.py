@@ -7,9 +7,7 @@ JIRA_CONFIG = {
     "token": ""
 }
 
-Test = {
-    "name": "hello"
-}
+Test = {}
 
 OPENAI_CONFIG = {
     "api_key": "",
