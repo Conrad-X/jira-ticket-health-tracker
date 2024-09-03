@@ -12,14 +12,12 @@ from email import encoders
 script1_path = "/app/ticket_scores.py"
 script2_path = "/app/backlog.py"
 
-# Paths to your configuration file
-config_path = "/app/config.yaml"
 
 # Run the first script
-subprocess.run(["python", script1_path, config_path])
+subprocess.run(["python", script1_path])
 
 # Run the second script
-subprocess.run(["python", script2_path, config_path])
+subprocess.run(["python", script2_path])
 
 # AWS SES Configuration
 SES_REGION = os.getenv('SES_REGION')
@@ -38,7 +36,7 @@ def send_email():
                  "Please find the attached files.")
     
     # Attachments
-    files = ["ticket_scores.xlsx", "backlog_report.xlsx"]
+    files = ["sprint_report.xlsx", "backlog_report.xlsx"]
 
     msg = MIMEMultipart()
     msg['Subject'] = subject

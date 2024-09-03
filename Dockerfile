@@ -19,4 +19,4 @@ ENV SES_REGION=us-east-1 \
     AWS_SECRET_ACCESS_KEY=
 
 # Command to run the Python script
-CMD ["python", "trigger_scripts_and_email.py"]
+CMD ["python", "main.py"]
