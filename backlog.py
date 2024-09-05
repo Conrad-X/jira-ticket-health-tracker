@@ -21,7 +21,7 @@ jira_options = {'server':JIRA_CONFIG['server']}
 jira = JIRA(options=jira_options, basic_auth=(JIRA_CONFIG['username'], JIRA_CONFIG['token']))
 
 # Fetch Bug Tickets
-tickets = jira.search_issues(jql_query,maxResults=5)  # Limit to 5 tickets
+tickets = jira.search_issues(jql_query) 
 
 wb = Workbook()
 ws = wb.active
