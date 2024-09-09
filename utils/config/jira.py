@@ -6,11 +6,11 @@ JIRA_CONFIG = {
 
 PARAMETERS = {
     "project": "",
-    "issuetype": "",
+    "issue_type": "",
     "sprint": ""
 }
 
 QUERIES = {
-    "ticket_scores": "project = {project} AND issuetype = {issuetype} AND Sprint = {sprint}",
+    "ticket_scores": "project = {project} AND issue_type = {issue_type} AND Sprint = {sprint}",
     "backlog": "project = {project} AND Sprint IS EMPTY AND statusCategory != Done"
 }

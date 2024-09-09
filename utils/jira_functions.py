@@ -9,7 +9,7 @@ jira = JIRA(options=jira_options, basic_auth=(JIRA_CONFIG['username'], JIRA_CONF
 # Get Ticket Epic
 def get_epic(issue):
     # Check if the issue is an Epic
-    if issue.fields.issuetype.name == "Epic":
+    if issue.fields.issue_type.name == "Epic":
         return issue.fields.summary  # Or return just the Epic name
 
     # Check if the issue has a parent (this is typically the case for sub-tasks)
@@ -19,7 +19,7 @@ def get_epic(issue):
         # Get the parent issue
         parent = jira.issue(parent_issue.key)
         # Check if the parent is an Epic
-        if parent.fields.issuetype.name == "Epic":
+        if parent.fields.issue_type.name == "Epic":
             return f"Parent Epic: {parent.fields.summary}"  # Return the Epic name
         else:
             return f"Parent Issue: {parent.fields.summary}"  # Return the parent issue name
@@ -33,7 +33,7 @@ def get_priority(issue):
 # Get Ticket Issue Type
 def get_issue_type(issue):
     # Return the issue type name
-    return issue.fields.issuetype.name
+    return issue.fields.issue_type.name
 
 # Get Time in Backlog
 def get_time_in_backlog(created_date):

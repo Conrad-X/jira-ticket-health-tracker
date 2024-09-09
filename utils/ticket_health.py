@@ -21,7 +21,6 @@ model = OPENAI['model']
 #Relevance Score
 def find_relevance_score(description_to_check, summary):
     prompt = PROMPTS['relevance'].format(description=description_to_check, summary=summary)
-    
     response = client.chat.completions.create(
         model=model,
         messages=[
@@ -31,22 +30,18 @@ def find_relevance_score(description_to_check, summary):
     ) 
     content = response.choices[0].message.content
     match = re.search(r"Relevance Score\s*:\s*(\d+)", content, re.IGNORECASE)
-    
     if match:
         relevance_score = float(match.group(1))
     else:
         print("Relevance Score not found.")
         relevance_score = 0.0  # Default or error value if score not found
-
     return relevance_score * 10  # Convert to percentage
 
 #Adherence Score
 def find_adherence_score(description_to_check, headings, placeholders):
 
     joined_headings = ", ".join(headings)
-    
     prompt = PROMPTS['adherence'].format(description=description_to_check, headings=joined_headings)
-  
     response = client.chat.completions.create(
         model=model,
         messages=[
@@ -54,25 +49,20 @@ def find_adherence_score(description_to_check, headings, placeholders):
             {"role": "user", "content": prompt}
         ]
     )
-    
     content = response.choices[0].message.content
     match = re.search(r"Adherence Score:\s*(0(\.\d+)?|1(\.0+)?)", content)
-    
     if match:
         adherence_score = float(match.group(1))
     else:
         print("Adherence Score not found.")
         adherence_score = 0.0  # Default or error value if score not found
-
     return adherence_score
 
 #Generate New description for tickets which do not a 100% adherence score
 def generate_perfect_adherence_description(description_to_check, headings):
 
     joined_headings = ", ".join(headings)
-
     prompt = PROMPTS['adherence_restructure'].format(description=description_to_check, headings=joined_headings)
-
     response = client.chat.completions.create(
         model=model,
         messages=[
@@ -80,14 +70,13 @@ def generate_perfect_adherence_description(description_to_check, headings):
             {"role": "user", "content": prompt}
         ]
     )
-    
     content = response.choices[0].message.content
     return content.strip()
 
 #Generate backlog report with graph embedded
-def generate_backlog_report(ws,wb, excel_file_path):
+def generate_backlog_report(active_workbook,workbook, excel_file_path):
     # Convert the worksheet to a DataFrame for processing
-    data = ws.values
+    data = active_workbook.values
     columns = next(data)[0:]  # Get the header
     df = pd.DataFrame(data, columns=columns)
 
@@ -147,19 +136,19 @@ def generate_backlog_report(ws,wb, excel_file_path):
     type_graph_buffer.seek(0)
 
     # Load and add the images from the buffers to the Excel sheet
-    ws.add_image(Image(backlog_graph_buffer), 'E2')  # Position the backlog graph
-    ws.add_image(Image(epic_graph_buffer), 'E20')  # Position the epic graph
-    ws.add_image(Image(type_graph_buffer), 'E38')  # Position the issue type graph
+    active_workbook.add_image(Image(backlog_graph_buffer), 'E2')  # Position the backlog graph
+    active_workbook.add_image(Image(epic_graph_buffer), 'E20')  # Position the epic graph
+    active_workbook.add_image(Image(type_graph_buffer), 'E38')  # Position the issue type graph
 
     # Save the Excel file
-    wb.save(excel_file_path)
+    workbook.save(excel_file_path)
 
 
 # Generate Sprint report with graph embedded 
-def generate_sprint_report(ws,wb, excel_file_path):
+def generate_sprint_report(active_workbook,workbook, excel_file_path):
 
     # Convert the worksheet to a DataFrame for plotting
-    df = pd.DataFrame(ws.values)
+    df = pd.DataFrame(active_workbook.values)
 
     if df.empty:
         print("DataFrame is empty. No data to plot.")
@@ -189,10 +178,10 @@ def generate_sprint_report(ws,wb, excel_file_path):
 
         # Load and add the image from the buffer to the Excel sheet
         img = Image(graph_buffer)
-        ws.add_image(img, 'M2')  # Position the image in the Excel sheet
+        active_workbook.add_image(img, 'M2')  # Position the image in the Excel sheet
 
     # Save the Excel file
-    wb.save(excel_file_path)
+    workbook.save(excel_file_path)
 
 # AWS SES Configuration
 SES_REGION = os.getenv('SES_REGION')
@@ -220,7 +209,7 @@ def send_email(recipients):
     # Join recipient emails into a single string for the 'To' header
     msg['To'] = ", ".join(recipients)
 
-    # Debug: Print email addresses to confirm they are correct
+    # Print email addresses to confirm they are correct
     print(f"Sending to: {msg['To']}")
 
     # Attach the body of the email as plain text

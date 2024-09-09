@@ -7,24 +7,24 @@ def main():
     script2 = 'backlog.py'
     
     # Run the first and second scripts concurrently
-    process1 = subprocess.Popen(['python', script1], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process2 = subprocess.Popen(['python', script2], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    sprint_report = subprocess.Popen(['python', script1], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    backlog_report = subprocess.Popen(['python', script2], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     
     # Wait for both scripts to complete
     print("Scripts are running")
-    process1.wait()
-    process2.wait()
+    sprint_report.wait()
+    backlog_report.wait()
 
     # Check if both scripts have completed successfully
-    if process1.returncode != 0:
-        print(f"Script {script1} failed. Error: {process1.stderr.read().decode()}")
+    if sprint_report.returncode != 0:
+        print(f"Script {script1} failed. Error: {sprint_report.stderr.read().decode()}")
         return
-    if process2.returncode != 0:
-        print(f"Script {script2} failed. Error: {process2.stderr.read().decode()}")
+    if backlog_report.returncode != 0:
+        print(f"Script {script2} failed. Error: {backlog_report.stderr.read().decode()}")
         return
 
     # Add emails of recepients
-    recipients = ['person1@conradlabs.com','person1@conradlabs.com']
+    recipients = ['maham.sheikh@conradlabs.com']
 
     # Files are present, proceed with email sending
     send_email(recipients)

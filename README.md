@@ -100,7 +100,7 @@ For more help please click [here](https://support.atlassian.com/atlassian-accoun
 ```bash
 PARAMETERS = {
     "project": " ",
-    "issuetype": " ",
+    "issue_type": " ",
     "sprint": " "
 }
 ```
@@ -113,14 +113,14 @@ If you are still unsure, click on Project Settings for your Jira Project in the 
 
     * Note: You must be a project administrator for the project or a Jira administrator in order to view the Project Settings page.
     
-`issuetype:` Choose whatever issue type you want to generate a report for eg: Task,Bug,Story.
+`issue_type:` Choose whatever issue type you want to generate a report for eg: Task,Bug,Story.
 
 `sprint:` Pass you sprint id here. Displayed right on top of your sprint board. 
 Note: If your sprint id has spaces in the title for eg: Sprint 22 please pass it as "sprint": “’Sprint 22’”
 
 ```bash
 QUERIES = {
-    "ticket_scores": "project = {project} AND issuetype = {issuetype} AND Sprint = {sprint}",
+    "ticket_scores": "project = {project} AND issue_type = {issue_type} AND Sprint = {sprint}",
     "backlog": "project = {project} AND Sprint IS EMPTY AND statusCategory != Done"
 }
 ```

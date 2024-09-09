@@ -10,7 +10,7 @@ jira = JIRA(options=jira_options, basic_auth=(JIRA_CONFIG['username'], JIRA_CONF
 
 # Project Config
 project = PARAMETERS['project']
-issuetype = PARAMETERS['issuetype']
+issue_type = PARAMETERS['issue_type']
 sprint = PARAMETERS['sprint']
 
 #weightage relevance
@@ -21,19 +21,19 @@ weightage_of_adherence = SCORING['weightage_of_adherence']
 # JQL Query
 jql_query = QUERIES['ticket_scores'].format(
     project=project,
-    issuetype=issuetype,
+    issue_type=issue_type,
     sprint=sprint
 )
 
 # Fetch Bug Tickets
 tickets = jira.search_issues(jql_query)  # Limit to 5 tickets
 
-wb = Workbook()
-ws = wb.active
+workbook = Workbook()
+active_workbook = workbook.active
 
 # Set the column headers
 fieldnames = ['Issue', 'Relevance Score (%)', 'Adherence Score (%)', 'Total Score (%)' , 'Edited Description']
-ws.append(fieldnames)
+active_workbook.append(fieldnames)
 
 # Process tickets 
 for issue in tickets:
@@ -42,18 +42,18 @@ for issue in tickets:
     task_template = getattr(issue.fields, 'customfield_10806', None) #Add your own customfield id here if you have any template
     bug_template = getattr(issue.fields, 'customfield_10805', None) #Add your own customfield id here if you have any template 
 
-    if issuetype == "Task" and task_template:
+    if issue_type == "Task" and task_template:
         placeholders = list(TEMPLATE_PLACEHOLDERS['task'].values())
         headings = TEMPLATE_HEADINGS['task_template_headings']
         description_to_check = task_template
-    elif issuetype == "Bug" and bug_template:
+    elif issue_type == "Bug" and bug_template:
         placeholders = list(TEMPLATE_PLACEHOLDERS['bug'].values())
         headings = TEMPLATE_HEADINGS['bug_template_headings']
         description_to_check = bug_template
-    elif issuetype == "Task":
+    elif issue_type == "Story":
         headings = TEMPLATE_HEADINGS['task_template_headings']
         placeholders = list(TEMPLATE_PLACEHOLDERS['task'].values())
-    elif issuetype == "Bug":
+    elif issue_type == "Bug":
         headings = TEMPLATE_HEADINGS['bug_template_headings']
         placeholders = list(TEMPLATE_PLACEHOLDERS['task'].values())
     else:
@@ -77,7 +77,7 @@ for issue in tickets:
         new_description = "No Ammendment Required"
 
     # Write the row to the Excel sheet
-    ws.append([
+    active_workbook.append([
         issue.key,
         f"{relevance_score:.2f}",
         f"{adherence_score:.2f}",
@@ -87,4 +87,4 @@ for issue in tickets:
 
     print(f"Issue: {issue.key}, Relevance Score: {relevance_score:.2f}%, Adherence Score: {adherence_score:.2f}%, Total Score: {total_score:.2f}%")
 
-generate_sprint_report(ws, wb, excel_file_path="sprint_report.xlsx")
+generate_sprint_report(active_workbook, workbook, excel_file_path="sprint_report.xlsx")

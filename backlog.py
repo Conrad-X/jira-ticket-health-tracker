@@ -8,7 +8,7 @@ from utils.jira_functions import get_time_in_backlog, get_epic , get_issue_type,
 
 # Project Config
 project = PARAMETERS['project']
-issuetype = PARAMETERS['issuetype']
+issue_type = PARAMETERS['issue_type']
 sprint = PARAMETERS['sprint']
 
 # JQL Query
@@ -23,12 +23,12 @@ jira = JIRA(options=jira_options, basic_auth=(JIRA_CONFIG['username'], JIRA_CONF
 # Fetch Bug Tickets
 tickets = jira.search_issues(jql_query) 
 
-wb = Workbook()
-ws = wb.active
+workbook = Workbook()
+active_workbook = workbook.active
 
 # Set the column headers
 fieldnames = ['Issue', 'Relevance Score (%)', 'Time in Backlog (days)', 'Priority', 'Epic', 'Issue Type']
-ws.append(fieldnames)
+active_workbook.append(fieldnames)
 
 # Process tickets and write data to Excel
 for issue in tickets:
@@ -59,7 +59,7 @@ for issue in tickets:
     epic = get_epic(issue)  
     issue_type = get_issue_type(issue) 
 
-    ws.append([
+    active_workbook.append([
         issue.key,
         f"{relevance_score:.2f}",
         time_in_backlog,
@@ -71,4 +71,4 @@ for issue in tickets:
     print(f"Issue: {issue.key}, Relevance Score: {relevance_score:.2f}%, Time in Backlog: {time_in_backlog} days, Priority: {priority}, Issue Type : {issue_type}")
 
 # Convert the worksheet to a DataFrame for processing
-generate_backlog_report(ws, wb, excel_file_path="backlog_report.xlsx")
+generate_backlog_report(active_workbook, workbook, excel_file_path="backlog_report.xlsx")
