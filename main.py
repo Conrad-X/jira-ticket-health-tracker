@@ -1,5 +1,5 @@
 import subprocess
-from utils.ticket_health import send_email
+from utils.email import send_email
 
 def main():
     # Names of the scripts and output files

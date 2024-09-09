@@ -1,32 +1,23 @@
 from jira import JIRA
 from openpyxl import Workbook
-from utils.config.jira import JIRA_CONFIG, PARAMETERS , QUERIES
+from utils.config.jira import PARAMETERS , QUERIES
 from utils.config.others import SCORING , TEMPLATE_PLACEHOLDERS, TEMPLATE_HEADINGS
 from utils.ticket_health import find_relevance_score,find_adherence_score, generate_perfect_adherence_description , generate_sprint_report
+from utils.jira_functions import jira_instance
+from utils.constants import NO_AMMENDMENTS_REQUIRED
 
-# Connect to Jira
-jira_options = {'server': JIRA_CONFIG['server']}
-jira = JIRA(options=jira_options, basic_auth=(JIRA_CONFIG['username'], JIRA_CONFIG['token']))
-
-# Project Config
-project = PARAMETERS['project']
-issue_type = PARAMETERS['issue_type']
-sprint = PARAMETERS['sprint']
-
-#weightage relevance
-weightage_of_relevance = SCORING['weightage_of_relevance']
-weightage_of_adherence = SCORING['weightage_of_adherence']
-
+#Declare Issue Type 
+issue_type=PARAMETERS['issue_type']
 
 # JQL Query
 jql_query = QUERIES['ticket_scores'].format(
-    project=project,
-    issue_type=issue_type,
-    sprint=sprint
+    project=PARAMETERS['project'],
+    issue_type=PARAMETERS['issue_type'],
+    sprint=PARAMETERS['sprint']
 )
 
 # Fetch Bug Tickets
-tickets = jira.search_issues(jql_query)  # Limit to 5 tickets
+tickets = jira_instance.search_issues(jql_query)  # Limit to 5 tickets
 
 workbook = Workbook()
 active_workbook = workbook.active
@@ -50,7 +41,7 @@ for issue in tickets:
         placeholders = list(TEMPLATE_PLACEHOLDERS['bug'].values())
         headings = TEMPLATE_HEADINGS['bug_template_headings']
         description_to_check = bug_template
-    elif issue_type == "Story":
+    elif issue_type == "Task":
         headings = TEMPLATE_HEADINGS['task_template_headings']
         placeholders = list(TEMPLATE_PLACEHOLDERS['task'].values())
     elif issue_type == "Bug":
@@ -67,14 +58,14 @@ for issue in tickets:
         adherence_score = find_adherence_score(description_to_check, headings, placeholders)*100
         relevance_score = find_relevance_score(description_to_check, issue.fields.summary)
         total_score = (
-            weightage_of_relevance * relevance_score +
-            weightage_of_adherence * adherence_score
+            SCORING['weightage_of_relevance'] * relevance_score +
+            SCORING['weightage_of_adherence'] * adherence_score
         )
 
     if adherence_score < 100 or adherence_score < 100.0 :
             new_description = generate_perfect_adherence_description(description_to_check, headings)
     else:
-        new_description = "No Ammendment Required"
+        new_description = NO_AMMENDMENTS_REQUIRED
 
     # Write the row to the Excel sheet
     active_workbook.append([

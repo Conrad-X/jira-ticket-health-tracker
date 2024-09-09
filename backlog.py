@@ -1,28 +1,20 @@
 from jira import JIRA
 from openpyxl import Workbook
 from datetime import datetime
-from utils.config.jira import JIRA_CONFIG, PARAMETERS , QUERIES
+from utils.config.jira import PARAMETERS , QUERIES 
 from utils.config.others import SCORING 
 from utils.ticket_health import find_relevance_score, generate_backlog_report
-from utils.jira_functions import get_time_in_backlog, get_epic , get_issue_type, get_priority
-
-# Project Config
-project = PARAMETERS['project']
-issue_type = PARAMETERS['issue_type']
-sprint = PARAMETERS['sprint']
+from utils.jira_functions import get_time_in_backlog, get_epic , get_issue_type, get_priority, jira_instance
 
 # JQL Query
 jql_query = QUERIES['backlog'].format(
-    project=project
+    project=PARAMETERS['project']
 )
 
-# Connect to Jira
-jira_options = {'server':JIRA_CONFIG['server']}
-jira = JIRA(options=jira_options, basic_auth=(JIRA_CONFIG['username'], JIRA_CONFIG['token']))
-
 # Fetch Bug Tickets
-tickets = jira.search_issues(jql_query) 
+tickets = jira_instance.search_issues(jql_query) 
 
+#Open workbook
 workbook = Workbook()
 active_workbook = workbook.active
 
