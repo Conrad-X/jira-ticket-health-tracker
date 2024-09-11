@@ -9,21 +9,26 @@ This repository contains a set of Python scripts designed to automate the analys
 ```bash
 /project-root
 │
-├── main_script.py          # Main script to trigger other scripts and send emails
-├── ticket_scores.py        # Script to calculate adherence and relevance scores of Jira tickets
+├── main.py                 # Main script to trigger other scripts and send emails
+├── ticket_scores.py        # Script to generate Sprint Report 
 ├── backlog.py              # Script to analyze Jira backlog and generate reports
 │
 ├── utils/
 │   ├── config/
 │   │   ├── jira.py         # Jira-related configurations and helper functions
 │   │   ├── open_ai.py      # OpenAI-related configurations and helper functions
-│   │   ├── other.py        # Other configurations and helper functions
+│   │   ├── other.py        # Other configurations and utility functions
+│   ├── graphs/
+│   │   ├── graphs.py       # Functions to generate different graphs from Jira data
+│   │   ├── constants.py    # Constants specifically related to graph generation
+│   ├── constants.py        # Global constants used throughout the project (error messages, etc.)
+│   ├── email.py            # Function to handle email sending using AWS SES
 │   ├── jira_functions.py   # Jira-specific functions for ticket processing
-│   ├── ticket_health.py    # Functions to assess the health of Jira ticketsand other general functions
+│   ├── ticket_health.py    # Functions to assess the health of Jira tickets and general utility functions
 │
-├── images/                 # Folder to store generated images or graphs
-├── .gitignore              # Ignore unnecessary files and folders
+├── image/                  # Folder to store generated images or graphs
 ├── .env                    # Environment variables for AWS SES and other configurations
+├── .gitignore              # Ignore unnecessary files and folders
 ├── requirements.txt        # Python dependencies for the project              
 └── README.md               # Project documentation
 ```
@@ -32,15 +37,15 @@ This repository contains a set of Python scripts designed to automate the analys
 
 ### main.py
 
-This script orchestrates the execution of the two main scripts—ticket_scores.py and backlog.py. It runs these scripts sequentially, passing configuration files and parameters as needed. After the scripts are executed, the generated Excel reports are emailed to the specified recipients using AWS SES.
-
-### backlog.py
-
-This script analyzes Jira backlog tickets on many different fields, filtering those that have been in the backlog for more than 20 days. It generates bar graphs for tasks in the backlog, issues by epic, and issues by type. These graphs are added to an Excel report.
+This script orchestrates the execution of the two main scripts—ticket_scores.py and backlog.py. It runs these scripts sequentially, passing configuration files and parameters as needed. 
 
 ### ticket_scores.py
 
 This script calculates the adherence and relevance scores of Jira tickets based on predefined templates and creates an improved ticket description if required. The script generates an Excel report containing the scores and plots relevant graphs for visualization.
+
+### backlog.py
+This script analyzes Jira backlog tickets on many different fields. It generates bar graphs for tasks in the backlog, issues by epic, and issues by type. These graphs are added to an Excel report.
+
 
 ## Utility Scripts (utils/)
 
@@ -56,6 +61,18 @@ Houses functions specifically related to processing Jira tickets, including fetc
 ### ticket_health.py
 
 Contains functions to assess the overall health of Jira tickets, including adherence and relevance scoring mechanisms.
+
+### email.py
+
+After the scripts are executed, the generated Excel reports are emailed to the specified recipients using AWS SES using functions in this script.
+
+### graphs.py
+
+Houses all the functions to generate all graphs included in the reports. Has a constants file in the same directory for all graph related fiels and titles. 
+
+### constants.py 
+
+Contains all the error messages and global constants used in the scripts. 
 
 ## Setup
 
@@ -100,7 +117,7 @@ For more help please click [here](https://support.atlassian.com/atlassian-accoun
 ```bash
 PARAMETERS = {
     "project": " ",
-    "issue_type": " ",
+    "issuetype": " ",
     "sprint": " "
 }
 ```
@@ -120,7 +137,7 @@ Note: If your sprint id has spaces in the title for eg: Sprint 22 please pass it
 
 ```bash
 QUERIES = {
-    "ticket_scores": "project = {project} AND issue_type = {issue_type} AND Sprint = {sprint}",
+    "ticket_scores": "project = {project} AND issue_type = {issuetype} AND Sprint = {sprint}",
     "backlog": "project = {project} AND Sprint IS EMPTY AND statusCategory != Done"
 }
 ```
@@ -167,6 +184,7 @@ A default template may look like this:
     <img src="/image/task_template.png" alt="Sample task description template" width="400"/>
 </div>
 
+You can add templates of your choice in this setion. 
 
 ```bash
 TEMPLATE_HEADINGS = {
@@ -187,6 +205,24 @@ TEMPLATE_HEADINGS = {
 
 Headings against which the adherence score is checked. You may change them according to your project needs. 
 
+### Adding more issue types 
+
+In the backlog.py and main.py script edit this section for adding more issue types. Make sure you have the templates and placeholders in place depending on your need. 
+
+```bash
+for issue in tickets:
+    task_template = getattr(issue.fields,CUSTOMFIELD_IDS['task_template_id'] , None) 
+    bug_template = getattr(issue.fields, CUSTOMFIELD_IDS['bug_template_id'], None) 
+
+    # Define mapping for issue types to template data
+    
+    issue_type_mapping = {
+        "Task": {"placeholders": list(TEMPLATE_PLACEHOLDERS['task'].values()), "headings": TEMPLATE_HEADINGS['task_template_headings'], "template": task_template},
+        "Bug": {"placeholders": list(TEMPLATE_PLACEHOLDERS['bug'].values()), "headings": TEMPLATE_HEADINGS['bug_template_headings'], "template": bug_template}  
+        # Add issue type of your choice here 
+    }
+```
+
 ### Set up Environment Variables in .env
 
 Add your AWS SES credentials and other necessary environment variables as shown.
@@ -202,9 +238,12 @@ Please contact Maham Sheikh at maham.sheikh@conradlabs.com to obtain these crede
 ### Pass Recipients List in main.py
 
 In the main.py file (line 27) please pass a list of recipients you want to forward the reports too. You can either pass one or more:
-recipients = ['maham.sheikh@conradlabs.com']
+
+```bash
+recipients = ['person1@conradlabs.com']
 
 recipients = ['person1@conradlabs.com','person1@conradlabs.com']
+```
 
 This automation setup allows for seamless generation and analysis of Jira ticket reports, ensuring that stakeholders are informed about the state of the backlog and ticket descriptions.
 

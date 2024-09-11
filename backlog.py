@@ -1,10 +1,13 @@
 from jira import JIRA
 from openpyxl import Workbook
 from datetime import datetime
-from utils.config.jira import PARAMETERS , QUERIES 
-from utils.config.others import SCORING 
-from utils.ticket_health import find_relevance_score, generate_backlog_report
-from utils.jira_functions import get_time_in_backlog, get_epic , get_issue_type, get_priority, jira_instance
+from utils.config.jira import PARAMETERS,QUERIES,CUSTOMFIELD_IDS
+from utils.config.others import TEMPLATE_PLACEHOLDERS
+from utils.ticket_health import find_relevance_score,generate_backlog_report
+from utils.jira_functions import get_time_in_backlog,get_epic,get_issue_type,get_priority,jira_instance
+
+
+issue_type=PARAMETERS['issuetype']
 
 # JQL Query
 jql_query = QUERIES['backlog'].format(
@@ -12,7 +15,7 @@ jql_query = QUERIES['backlog'].format(
 )
 
 # Fetch Bug Tickets
-tickets = jira_instance.search_issues(jql_query) 
+tickets = jira_instance.search_issues(jql_query, maxResults=2)  # Limit to 5 tickets
 
 #Open workbook
 workbook = Workbook()
@@ -26,26 +29,28 @@ active_workbook.append(fieldnames)
 for issue in tickets:
 
     # Default to using description field
-    description_to_check = issue.fields.description
-    task_template = getattr(issue.fields, 'customfield_10806', None)
-    bug_template = getattr(issue.fields, 'customfield_10805', None)
+    task_template = getattr(issue.fields, CUSTOMFIELD_IDS['task_template_id'] , None) 
+    bug_template = getattr(issue.fields, CUSTOMFIELD_IDS['bug_template_id'], None)  
 
-    # Check if the Bug/Task template is filled out and contains the relevant sections
-    if task_template:
-        description_to_check = task_template
-    if bug_template:
-        description_to_check = bug_template
+    # Define mapping for issue types to template data
+    issue_type_mapping = {
+        "Task": {"template": task_template, "placeholders": list(TEMPLATE_PLACEHOLDERS['task'].values())},
+        "Bug": {"template": bug_template, "placeholders": list(TEMPLATE_PLACEHOLDERS['bug'].values())}
+        # Add issue type of your choice here
+    }
 
-    if description_to_check is None:
+    # Get description and placeholders based on issue type
+    if issue_type in issue_type_mapping:
+        description_to_check = issue_type_mapping[issue_type]["template"] or issue.fields.description
+        placeholders = issue_type_mapping[issue_type]["placeholders"]
+    
+    if description_to_check is None: 
         relevance_score = 0 
         total_score = 0
 
-    else:
-        relevance_score = find_relevance_score(description_to_check, issue.fields.summary)
-
     summary = issue.fields.summary or ""
     created_date = datetime.strptime(issue.fields.created, "%Y-%m-%dT%H:%M:%S.%f%z")
-    relevance_score = find_relevance_score(description_to_check, summary)
+    relevance_score = find_relevance_score(description_to_check, summary,placeholders)
     time_in_backlog = get_time_in_backlog(created_date)
     priority = get_priority(issue)
     epic = get_epic(issue)  

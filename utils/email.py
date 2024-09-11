@@ -67,4 +67,4 @@ def send_email(recipients):
     except NoCredentialsError:
         print(NO_CREDENTIALS_ERROR)
     except Exception as e:
-       print(f"{EMAIL_SENDING_FAILED:}{e.text}")
+        print(f"{EMAIL_SENDING_FAILED}: {e}")

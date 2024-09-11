@@ -12,8 +12,8 @@ client = OpenAI(api_key=OPENAI['api_key'])
 model = OPENAI['model']
 
 #Relevance Score
-def find_relevance_score(description_to_check, summary):
-    prompt = PROMPTS['relevance'].format(description=description_to_check, summary=summary)
+def find_relevance_score(description_to_check, summary,placeholders):
+    prompt = PROMPTS['relevance'].format(description=description_to_check, summary=summary, placeholders=placeholders)
     response = client.chat.completions.create(
         model=model,
         messages=[
@@ -66,8 +66,10 @@ def generate_perfect_adherence_description(description_to_check, headings):
     content = response.choices[0].message.content
     return content.strip()
 
-#Generate backlog report with graph embedded
-def generate_backlog_report(active_workbook,workbook, excel_file_path):
+# Generate backlog report with graph embedded
+
+def generate_backlog_report(active_workbook, workbook, excel_file_path):
+    
     # Convert the worksheet to a DataFrame for processing
     data = active_workbook.values
     columns = next(data)[0:]  # Get the header
@@ -75,15 +77,22 @@ def generate_backlog_report(active_workbook,workbook, excel_file_path):
 
     if df.empty:
         print(DATAFRAME_EMPTY)
+        return
 
-    issue_type_graph_buffer = generate_issue_type_graph
-    backlog_graph_buffer= generate_backlog_duration_graph(df, days_threshold=20)    
-    epic_graph_buffer= generate_epic_graph
+    # Generate the graphs
+    issue_type_graph_buffer = generate_issue_type_graph(df)  # Correct function call
+    backlog_graph_buffer = generate_backlog_duration_graph(df, days_threshold=20)
+    epic_graph_buffer = generate_epic_graph(df)  # Correct function call
 
     # Load and add the images from the buffers to the Excel sheet
-    active_workbook.add_image(Image(backlog_graph_buffer), 'E2')  # Position the backlog graph
-    active_workbook.add_image(Image(epic_graph_buffer), 'E20')  # Position the epic graph
-    active_workbook.add_image(Image(issue_type_graph_buffer), 'E38')  # Position the issue type graph
+    img_backlog = Image(backlog_graph_buffer)  # Convert backlog graph buffer to Image
+    active_workbook.add_image(img_backlog, 'E2')  # Position the backlog graph
+
+    img_epic = Image(epic_graph_buffer)  # Convert epic graph buffer to Image
+    active_workbook.add_image(img_epic, 'E20')  # Position the epic graph
+
+    img_issue_type = Image(issue_type_graph_buffer)  # Convert issue type graph buffer to Image
+    active_workbook.add_image(img_issue_type, 'E38')  # Position the issue type graph
 
     # Save the Excel file
     workbook.save(excel_file_path)

@@ -2,7 +2,7 @@
 
 # Backlog Duration Graph (Backlog Script)
 
-BACKLOG_DURATION_GRAPH_TITLE = "Tasks in Backlog for More Than XX Days"
+BACKLOG_DURATION_GRAPH_TITLE = "Tasks in Backlog for More Than 20 Days"
 BACKLOG_DURATION_X_LABEL = "Issue"
 BACKLOG_DURATION_Y_LABEL = "Time in Backlog (Days)"
 

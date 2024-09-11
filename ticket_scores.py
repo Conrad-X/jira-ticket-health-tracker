@@ -1,24 +1,25 @@
 from jira import JIRA
 from openpyxl import Workbook
-from utils.config.jira import PARAMETERS , QUERIES
+from utils.config.jira import PARAMETERS , QUERIES , CUSTOMFIELD_IDS
 from utils.config.others import SCORING , TEMPLATE_PLACEHOLDERS, TEMPLATE_HEADINGS
 from utils.ticket_health import find_relevance_score,find_adherence_score, generate_perfect_adherence_description , generate_sprint_report
 from utils.jira_functions import jira_instance
 from utils.constants import NO_AMMENDMENTS_REQUIRED
 
-#Declare Issue Type 
-issue_type=PARAMETERS['issue_type']
+
+issue_type=PARAMETERS['issuetype']
 
 # JQL Query
 jql_query = QUERIES['ticket_scores'].format(
     project=PARAMETERS['project'],
-    issue_type=PARAMETERS['issue_type'],
+    issuetype = PARAMETERS['issuetype'],
     sprint=PARAMETERS['sprint']
 )
 
 # Fetch Bug Tickets
-tickets = jira_instance.search_issues(jql_query)  # Limit to 5 tickets
+tickets = jira_instance.search_issues(jql_query, maxResults=2)  # Limit to 5 tickets
 
+# Open workbook
 workbook = Workbook()
 active_workbook = workbook.active
 
@@ -28,27 +29,24 @@ active_workbook.append(fieldnames)
 
 # Process tickets 
 for issue in tickets:
-    # Default to using description field
-    description_to_check = issue.fields.description
-    task_template = getattr(issue.fields, 'customfield_10806', None) #Add your own customfield id here if you have any template
-    bug_template = getattr(issue.fields, 'customfield_10805', None) #Add your own customfield id here if you have any template 
+    task_template = getattr(issue.fields,CUSTOMFIELD_IDS['task_template_id'] , None) 
+    bug_template = getattr(issue.fields, CUSTOMFIELD_IDS['bug_template_id'], None) 
 
-    if issue_type == "Task" and task_template:
-        placeholders = list(TEMPLATE_PLACEHOLDERS['task'].values())
-        headings = TEMPLATE_HEADINGS['task_template_headings']
-        description_to_check = task_template
-    elif issue_type == "Bug" and bug_template:
-        placeholders = list(TEMPLATE_PLACEHOLDERS['bug'].values())
-        headings = TEMPLATE_HEADINGS['bug_template_headings']
-        description_to_check = bug_template
-    elif issue_type == "Task":
-        headings = TEMPLATE_HEADINGS['task_template_headings']
-        placeholders = list(TEMPLATE_PLACEHOLDERS['task'].values())
-    elif issue_type == "Bug":
-        headings = TEMPLATE_HEADINGS['bug_template_headings']
-        placeholders = list(TEMPLATE_PLACEHOLDERS['task'].values())
-    else:
-        headings = []
+    # Define mapping for issue types to template data
+    
+    issue_type_mapping = {
+        "Task": {"placeholders": list(TEMPLATE_PLACEHOLDERS['task'].values()), "headings": TEMPLATE_HEADINGS['task_template_headings'], "template": task_template},
+        "Bug": {"placeholders": list(TEMPLATE_PLACEHOLDERS['bug'].values()), "headings": TEMPLATE_HEADINGS['bug_template_headings'], "template": bug_template}  
+        # Add issue type of your choice here 
+    }
+
+    # Get placeholders and headings based on issue type
+    if issue_type in issue_type_mapping:
+        placeholders = issue_type_mapping[issue_type]["placeholders"]
+        headings = issue_type_mapping[issue_type]["headings"]
+        
+        # Check if description is in custom field or fallback to Jira description
+        description_to_check = issue_type_mapping[issue_type]["template"] or issue.fields.description
 
     if description_to_check is None:
         adherence_score = 0
@@ -56,7 +54,7 @@ for issue in tickets:
         total_score = 0
     else:
         adherence_score = find_adherence_score(description_to_check, headings, placeholders)*100
-        relevance_score = find_relevance_score(description_to_check, issue.fields.summary)
+        relevance_score = find_relevance_score(description_to_check, issue.fields.summary, placeholders)
         total_score = (
             SCORING['weightage_of_relevance'] * relevance_score +
             SCORING['weightage_of_adherence'] * adherence_score

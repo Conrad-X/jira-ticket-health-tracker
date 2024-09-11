@@ -1,7 +1,7 @@
 # jira_functions.py
 
-JIRA_CONNECTION_FAILURE = "JIRA connection established successfully."
-JIRA_CONNECTION_SUCCESS = "Failed to connect to JIRA: "
+JIRA_CONNECTION_FAILURE = "Failed to connect to JIRA: "
+JIRA_CONNECTION_SUCCESS = "JIRA connection established successfully."
 EPIC = "Epic"
 NO_PARENT_EPIC = "No Parent"
 ISSUE_PRIOROTY_NOT_ASSIGNED = "No Priority Found"
@@ -24,3 +24,10 @@ FILE_NOT_FOUND = "File not found. Skipping attachment."
 # ticket_scores.py
 
 NO_AMMENDMENTS_REQUIRED = "No Ammendments Required"
+
+# main.py
+
+SCRIPTS_RUNNING = "Scripts are running"
+SCRIPT1_FAILED_ERROR = "Script {script1} failed. Error: {error_message}"
+SCRIPT2_FAILED_ERROR = "Script {script2} failed. Error: {error_message}"
+SCRIPTS_RAN_SUCCESSFULLY = "Both scripts ran successfully"

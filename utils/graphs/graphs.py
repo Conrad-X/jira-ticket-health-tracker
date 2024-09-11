@@ -1,7 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from io import BytesIO
-from graphs.constants import *
+import openpyxl
+from utils.graphs.constants import *
 
 # Graphs for backlog report 
 
@@ -17,9 +18,6 @@ def generate_backlog_duration_graph(df, days_threshold=20):
     # Generate a graph from the filtered DataFrame
     plt.figure(figsize=(10, 6))
     plt.bar(df_filtered['Issue'], df_filtered['Time in Backlog (days)'], color='red')
-    plt.title(f'Tasks in Backlog for More Than {days_threshold} Days')
-    plt.xlabel('Issue')
-    plt.ylabel('Time in Backlog (days)')
     plt.title(BACKLOG_DURATION_GRAPH_TITLE)
     plt.xlabel(BACKLOG_DURATION_X_LABEL)
     plt.ylabel(BACKLOG_DURATION_Y_LABEL)
@@ -44,13 +42,9 @@ def generate_issue_type_graph(df):
     
     plt.figure(figsize=(10, 6))
     type_counts.plot(kind='bar', color='skyblue')
-
     plt.title(ISSUE_TYPE_GRAPH_TITLE)
     plt.xlabel(ISSUE_TYPE_X_LABEL)
     plt.ylabel(ISSUE_TYPE_Y_LABEL)
-    plt.title('Number of Issues by Type')
-    plt.xlabel('Issue Type')
-    plt.ylabel('Number of Issues')
     plt.xticks(rotation=45)
     plt.tight_layout()
 
@@ -72,13 +66,9 @@ def generate_epic_graph(df):
     
     plt.figure(figsize=(10, 6))
     epic_counts.plot(kind='bar', color='skyblue')
-    
     plt.title(EPIC_TYPE_GRAPH_TITLE)
     plt.xlabel(EPIC_TYPE_X_LABEL)
     plt.ylabel(EPIC_TYPE_Y_LABEL)
-    plt.title('Number of Issues per Epic')
-    plt.xlabel('Epic')
-    plt.ylabel('Number of Issues')
     plt.xticks(rotation=45)
     plt.tight_layout()
 
@@ -102,13 +92,9 @@ def generate_ticket_scores_graph(df):
     # Generate a graph from the DataFrame
     plt.figure(figsize=(10, 6))
     df.plot(x='Issue', y=['Relevance Score (%)', 'Adherence Score (%)', 'Total Score (%)'], kind='bar')
-
     plt.title(TICKET_SCORES_GRAPH_TITLE)
     plt.xlabel(TICKET_SCORES_X_LABEL)
     plt.ylabel(TICKET_SCORES_Y_LABEL)
-    plt.title('Jira Ticket Scores')
-    plt.xlabel('Issue')
-    plt.ylabel('Scores')
     plt.xticks(rotation=45)
     plt.tight_layout()
 

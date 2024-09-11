@@ -15,6 +15,12 @@ TEMPLATE_PLACEHOLDERS = {
         "accebtability_criteria": "[List the conditions that must be met for the task to be considered complete.]",
         "technical_notes": "[Any technical information that might be helpful for the developer, such as dependencies, libraries, or code snippets].",
         "testing_instructions": "[Instructions or considerations for testing the task or fix.]"
+    },
+    "story":{
+        # Add if you require
+    },
+    "epic":{
+        # Add if you require
     }
 }
 
@@ -30,5 +36,11 @@ TEMPLATE_HEADINGS = {
         "Steps to Reproduce",
         "Technical Notes",
         "Testing Instructions"
+    ],
+    "story_template_headings":[
+        # Add if you require
+    ],
+    "epic_template_headings":[
+        # Add if you require
     ]
 }

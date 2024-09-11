@@ -1,5 +1,5 @@
 OPENAI = {
-    "api_key": "",
+    "api_key": " ",
     "model": "gpt-4o"
 }
 
@@ -9,7 +9,7 @@ PROMPTS = {
         The description provided is: "{description}". Please analyze it based on the provided template headings.
         Rate how well the description aligns with the summary on a scale of 1 to 10, where 1 means not aligned at all and 10 means perfectly aligned. Also, provide a brief explanation for the score.
         Write Relevance Score clearly as "Relevance Score: <score>".
-        Also keep in mind that the headings should not have placeholder values under them. If such a case occurs adjust relevance score accordingly. If the entire description consists of basically the template values that means relevance score is 0. If description is left empty it also means 0.
+        Also keep in mind that the headings should not have placeholder values "{placeholders}"under them. If such a case occurs adjust relevance score accordingly. If the entire description consists of basically the template values that means relevance score is 0. If description is left empty it also means 0.
     ''',
     "adherence": '''
         You are a helpful assistant. A Jira ticket has the following description: "{description}".
