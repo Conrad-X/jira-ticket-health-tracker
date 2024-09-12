@@ -132,6 +132,8 @@ If you are still unsure, click on Project Settings for your Jira Project in the 
     
 `issue_type:` Choose whatever issue type you want to generate a report for eg: Task,Bug,Story.
 
+    * Note: If you use any other issue type other than task or bug, please configure it first as explained in the section below.
+
 `sprint:` Pass you sprint id here. Displayed right on top of your sprint board. 
 Note: If your sprint id has spaces in the title for eg: Sprint 22 please pass it as "sprint": “’Sprint 22’”
 
@@ -208,7 +210,6 @@ Headings against which the adherence score is checked. You may change them accor
 ### Adding more issue types 
 
 In the backlog.py and main.py script edit this section for adding more issue types. Make sure you have the templates and placeholders in place depending on your need. 
-
 ```bash
 for issue in tickets:
     task_template = getattr(issue.fields,CUSTOMFIELD_IDS['task_template_id'] , None) 
@@ -225,6 +226,8 @@ for issue in tickets:
 
 ### Set up Environment Variables in .env
 
+Make sure you name your file as .env.
+
 Add your AWS SES credentials and other necessary environment variables as shown.
 
 ```bash
@@ -232,18 +235,9 @@ SES_REGION=<your-aws-region>
 SES_SENDER=<your-sender-email>
 AWS_ACCESS_KEY_ID=<your-aws-access-key>
 AWS_SECRET_ACCESS_KEY=<your-aws-secret-key>
+SES_RECEPIENT_LIST=<your-email-recepients>
 ```
 Please contact Maham Sheikh at maham.sheikh@conradlabs.com to obtain these credentials.
-
-### Pass Recipients List in main.py
-
-In the main.py file (line 27) please pass a list of recipients you want to forward the reports too. You can either pass one or more:
-
-```bash
-recipients = ['person1@conradlabs.com']
-
-recipients = ['person1@conradlabs.com','person1@conradlabs.com']
-```
 
 This automation setup allows for seamless generation and analysis of Jira ticket reports, ensuring that stakeholders are informed about the state of the backlog and ticket descriptions.
 
