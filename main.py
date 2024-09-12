@@ -25,12 +25,9 @@ def main():
     if backlog_report.returncode != 0:
         print(f"Script {script2} failed. Error: {backlog_report.stderr.read().decode()}")
         return
-    
-    # Add emails of recepients
-    recipients = ['maham.sheikh@conradlabs.com']
 
     # Files are present, proceed with email sending
-    #send_email(recipients)
+    send_email()
 
 if __name__ == "__main__":
     main()
