@@ -17,7 +17,7 @@ jql_query = QUERIES['ticket_scores'].format(
 )
 
 # Fetch Bug Tickets
-tickets = jira_instance.search_issues(jql_query)  # Limit to 5 tickets
+tickets = jira_instance.search_issues(jql_query)  
 
 # Open workbook
 workbook = Workbook()

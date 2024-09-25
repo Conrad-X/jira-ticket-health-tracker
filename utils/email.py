@@ -19,7 +19,7 @@ SES_RECEPIENT_LIST = os.getenv("SES_RECEPIENT_LIST")
 SES_RECEPIENT_LIST = SES_RECEPIENT_LIST.split(",")
 
 
-def send_email(recipients):
+def send_email():
     # Initialize the SES client
     ses_client = boto3.client("ses",region_name=SES_REGION,
         aws_access_key_id=AWS_ACCESS_KEY,
