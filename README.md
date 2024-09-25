@@ -152,6 +152,8 @@ If you are still unsure, click on Project Settings for your Jira Project in the 
 
     * Note: If you use any other issue type other than task or bug, please configure it first as explained in the section below. Issue types can only be paas
 
+    * Note: If you use any other issue type other than task or bug, please configure it first as explained in the section below.
+
 `sprint:` Pass you sprint id here. Displayed right on top of your sprint board. 
 Note: If your sprint id has spaces in the title for eg: Sprint 22 please pass it as "sprint": "'Sprint 22'"
 
