@@ -15,7 +15,7 @@ jql_query = QUERIES['backlog'].format(
 )
 
 # Fetch Bug Tickets
-tickets = jira_instance.search_issues(jql_query)  # Limit to 5 tickets
+tickets = jira_instance.search_issues(jql_query, maxResults = 100)  
 
 #Open workbook
 workbook = Workbook()

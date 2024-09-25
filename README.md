@@ -80,14 +80,32 @@ Contains all the error messages and global constants used in the scripts.
 
 ```
 git clone <repository-url>
-cd project-root
+cd jira-ticket-health-tracker
+```
+
+### Python Installation
+
+You will need python for this project. If not available please install python on your system. 
+Those using `python3` are required to edit this in line 12-13 in `main.py` accordingly:
+
+```python
+    sprint_report = subprocess.Popen(['python3', script1], stdout=sys.stdout, stderr=sys.stderr)
+    backlog_report = subprocess.Popen(['python3', script2], stdout=sys.stdout, stderr=sys.stderr)
 ```
 
 ### Install Dependencies 
 
 Install the required Python packages using pip:
+
+**For Python:**
+
 ```
 pip install -r requirements.txt
+```
+
+**For Python3:**
+```
+pip3 install -r requirements.txt
 ```
 
 ### Set up Jira Configuration
@@ -130,12 +148,12 @@ If you are still unsure, click on Project Settings for your Jira Project in the 
 
     * Note: You must be a project administrator for the project or a Jira administrator in order to view the Project Settings page.
     
-`issue_type:` Choose whatever issue type you want to generate a report for eg: Task,Bug,Story.
+`issue_type:` Choose whatever issue type you want to generate a report for from Task, Bug , Epic , Story etc. (Ensure you pass it as "Task" not "task" etc. )
 
-    * Note: If you use any other issue type other than task or bug, please configure it first as explained in the section below.
+    * Note: If you use any other issue type other than task or bug, please configure it first as explained in the section below. Issue types can only be paas
 
 `sprint:` Pass you sprint id here. Displayed right on top of your sprint board. 
-Note: If your sprint id has spaces in the title for eg: Sprint 22 please pass it as "sprint": “’Sprint 22’”
+Note: If your sprint id has spaces in the title for eg: Sprint 22 please pass it as "sprint": "'Sprint 22'"
 
 ```bash
 QUERIES = {
@@ -144,7 +162,42 @@ QUERIES = {
 }
 ```
 
-Will automatically pick the parameters you pass. You can alter the as per your need. 
+Will automatically pick the parameters you pass. You can alter this as per your need, for instance you can edit your sprint query to cater for all issue types like this:
+
+```bash
+"ticket_scores": "project = {project} AND Sprint = {sprint}"
+```
+Please not that if you edit your query here for `ticket_scores` to the one mentioned above you will have to edit your query in `ticket_scores.py` accordingly:
+```bash
+# JQL Query
+jql_query = QUERIES['ticket_scores'].format(
+    project=PARAMETERS['project'],
+    sprint=PARAMETERS['sprint']
+)
+```
+Similarly any change in 
+
+```bash
+"backlog": "project = {project} AND Sprint IS EMPTY AND statusCategory != Done"
+```
+will need a change in query in `backlog.py`:
+
+```bash
+# JQL Query
+jql_query = QUERIES['backlog'].format(
+    project=PARAMETERS['project']
+)
+```
+
+### Limiting query results 
+
+You are required to limit your backlog report to a total of 100 tickets. This has been done in `backlog.py` in this manner:
+
+```bash
+tickets = jira_instance.search_issues(jql_query, maxResults = 100)
+```
+
+Any change in number of tickets is supposed to be made here. This can be applied to `tickets.py` in the same manner.
 
 ### Set up OpenAI configuration
 
@@ -237,6 +290,12 @@ AWS_ACCESS_KEY_ID=<your-aws-access-key>
 AWS_SECRET_ACCESS_KEY=<your-aws-secret-key>
 SES_RECEPIENT_LIST=<your-email-recepients>
 ```
+**Note:** You can pass multiple recepients in this form : 
+
+```bash
+SES_RECEPIENT_LIST=person1@conradlabs.com,person2@conradlabs.com 
+```
+
 Please contact Maham Sheikh at maham.sheikh@conradlabs.com to obtain these credentials.
 
 This automation setup allows for seamless generation and analysis of Jira ticket reports, ensuring that stakeholders are informed about the state of the backlog and ticket descriptions.
